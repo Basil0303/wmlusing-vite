@@ -8,19 +8,19 @@ import { Modal } from "react-bootstrap";
 import { Form } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import Select from "react-select";
-import { Helmet } from "react-helmet";
+import { ShowToast } from "../utils/Toast";
 
 function Users() {
   const [getuser, setgetUser] = useState([]);
- 
+
   const [data, setData] = useState({
     name: "",
     address: "",
     mobile: "",
     username: "",
-    password:"",
+    password: "",
     role: "",
-    active: "",
+    // active: "",
   });
 
   const [pagination, setpagination] = useState({
@@ -51,10 +51,9 @@ function Users() {
   const getUserList = async () => {
     try {
       const response = await apiCall("get", userUrl, {}, params);
-  
-   
+
       if (response.status === true) {
-        setgetUser(response.data);
+        setgetUser(response?.data?.doc);
         setpagination({
           hasNextPage: response.data.hasNextPage,
           hasPreviousPage: response.data.hasPreviousPage,
@@ -68,38 +67,32 @@ function Users() {
     }
   };
 
-   //------create & edit location-------
-   const userList = async (e, id) => {
+  //------create & edit location-------
+  const userList = async (e, id) => {
     try {
       if (id) {
-        const updateResponse = await apiCall(
-          "put",
-          `${userUpUrl}/${id}`,
-          data
-        );
+        const updateResponse = await apiCall("put", `${userUpUrl}/${id}`, data);
         if (updateResponse) {
           setShow(false);
           await getUserList();
         }
+        ShowToast("succesfully Adedd", true);
         setData({
           name: user.name,
           address: user.address,
           mobile: user.mobile,
           username: user.username,
-          password:user.password,
+          password: user.password,
           role: user.role,
-          active: user.active,
+          // active: user.active,
         });
-    
-        
-        
-      } 
-      else {
+      } else {
         const createResponse = await apiCall("post", usercreUrl, data);
-     
+
         if (createResponse) {
           setShow(false);
           await getUserList();
+          ShowToast("succesfully Adedd", true);
         }
       }
       setData({
@@ -107,10 +100,10 @@ function Users() {
         address: "",
         mobile: "",
         username: "",
-        password:"",
+        password: "",
         role: "",
         active: "",
-      })
+      });
     } catch (error) {
       console.error(error);
     }
@@ -118,13 +111,17 @@ function Users() {
 
   /// delete location list
   const deleteUser = async (id) => {
- 
     try {
-      const response = await apiCall("delete", `${userDelUrl}/${remove.id}`,data);
+      const response = await apiCall(
+        "delete",
+        `${userDelUrl}/${remove.id}`,
+        data
+      );
 
       if (response) {
-         getUserList();
+        getUserList();
         setRemove({ show: false, id: null });
+        ShowToast("succesfully deleted", true);
       }
     } catch (error) {
       console.error(error);
@@ -145,16 +142,14 @@ function Users() {
     setShow(true);
   };
 
-
   const staticOptions = [
     { value: "warehouseManager", label: "warehouseManager " },
-
   ];
-  
+
   useEffect(() => {
     getUserList();
     if (!show) {
-      setEdit(null); 
+      setEdit(null);
       setData({
         name: "",
         address: "",
@@ -163,20 +158,18 @@ function Users() {
         password: "",
         role: "",
         active: "",
-      }); 
+      });
     }
   }, [params, show]);
 
   return (
     <div>
-     
       <div className="col-xl-12">
         <div className="card dz-card" id="bootstrap-table11">
           <div className="card-header flex-wrap d-flex justify-content-between">
             <div>
               <h4 className="card-title">User Table</h4>
             </div>
-
             <div
               className="nav nav-tabs dzm-tabs d-flex align-items-center"
               id="myTab-8"
@@ -243,7 +236,6 @@ function Users() {
               </li>
             </div>
           </div>
-
           <div className="tab-content" id="myTabContent-8">
             <div
               className="tab-pane fade show active"
@@ -261,8 +253,9 @@ function Users() {
                         <th>Address</th>
                         <th>Mobile</th>
                         <th>username</th>
+                        <th>Password</th>
                         <th>role</th>
-                        <th>Actions</th>
+                        <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -282,7 +275,7 @@ function Users() {
                               <td>{user?.username}</td>
                               <td>{user?.password}</td>
                               <td>{user?.role}</td>
-                             
+
                               <td>
                                 {user?.active === true && (
                                   <span
@@ -302,7 +295,7 @@ function Users() {
                                   </span>
                                 )}
                               </td>
-                           
+
                               <td>
                                 <div className="dropdown">
                                   <button
@@ -363,19 +356,16 @@ function Users() {
                                     <a
                                       className="dropdown-item  text-danger"
                                       href="#"
-                                   onClick={(e)=>{
-                                    e.preventDefault();
-                                   setRemove({
-                                    show:true,
-                                    id:user?._id
-                                   });
-                                  
-
-                                   }}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        setRemove({
+                                          show: true,
+                                          id: user?._id,
+                                        });
+                                      }}
                                     >
                                       Delete
                                     </a>
-                                
                                   </div>
                                 </div>
                               </td>
@@ -432,6 +422,7 @@ function Users() {
           </div>
         </div>
       </div>
+
       {/*modal start */}
       <Modal show={show} onHide={() => handleCloses()}>
         <div className="modal-content">
@@ -471,10 +462,9 @@ function Users() {
               </div>
               <div className="mb-3">
                 <label htmlFor="mobileNumber" className="form-label">
-                  Address<span className="text-danger">*</span>
+                  Address
                 </label>
-                <input
-                  type="text"
+                <textarea
                   name="address"
                   value={data.address ? data.address : ""}
                   onChange={(e) =>
@@ -491,24 +481,26 @@ function Users() {
                   Mobile<span className="text-danger">*</span>
                 </label>
                 <input
-                 required
-                  type="text"
-                  name="mpbile"
+                  required
+                  type="tel" 
+                  name="mob"
+                  maxLength="10" 
+                  minLength="10" 
+                  pattern="[0-9]{10}"
                   value={data.mobile ? data.mobile : ""}
-                  onChange={(e) =>
-                    setData({ ...data, mobile: e.target.value })
-                  }
+                  onChange={(e) => setData({ ...data, mobile: e.target.value })}
                   placeholder="Enter mobile"
                   className="form-control"
                   id="mobileNumber"
                 />
               </div>
+
               <div className="mb-3">
                 <label htmlFor="mobileNumber" className="form-label">
-                username<span className="text-danger">*</span>
+                  username<span className="text-danger">*</span>
                 </label>
                 <input
-                 required
+                  required
                   type="text"
                   name="username"
                   value={data.username ? data.username : ""}
@@ -517,29 +509,27 @@ function Users() {
                   }
                   placeholder="Enter username"
                   className="form-control"
-                  
                 />
               </div>
               <div className="mb-3">
                 <label htmlFor="mobileNumber" className="form-label">
-                Password<span className="text-danger">*</span>
+                  Password<span className="text-danger">*</span>
                 </label>
                 <input
-                 required
-                  type="text"
-                  name="username"
+                  required
+                  type="password"
+                  name="password"
                   value={data.password ? data.password : ""}
                   onChange={(e) =>
                     setData({ ...data, password: e.target.value })
                   }
                   placeholder="Enter password"
                   className="form-control"
-                  
                 />
               </div>
               <div className="mb-3">
                 <label htmlFor="mobileNumber" className="form-label">
-                Role<span className="text-danger">*</span>
+                  Role<span className="text-danger">*</span>
                 </label>
                 <Select
                   required
@@ -559,7 +549,6 @@ function Users() {
                 </label>
                 <label>
                   <input
-                  required
                     className="mx-2"
                     type="radio"
                     name="action"
@@ -607,10 +596,7 @@ function Users() {
           <p>Are you sure to delete </p>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-          variant="success"
-            onClick={handleCloses}
-          >
+          <Button variant="success" onClick={handleCloses}>
             No
           </Button>
           <Button variant="danger" onClick={deleteUser}>
