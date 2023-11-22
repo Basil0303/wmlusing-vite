@@ -6,6 +6,7 @@ import { productDelUrl } from "../Services/BaseUrl";
 import { Modal } from "react-bootstrap";
 import { Form } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
+import { ShowToast } from "../utils/Toast";
 function Products() {
   const [getproduct, setgetproduct] = useState([]);
 
@@ -16,7 +17,6 @@ function Products() {
     description: "",
   });
 
-
   const [pagination, setpagination] = useState({
     hasNextPage: false,
     hasPreviousPage: false,
@@ -25,7 +25,7 @@ function Products() {
 
   const [params, setparams] = useState({
     page: 1,
-    limit: 10,
+    limit: 5,
     query: "",
   });
 
@@ -33,7 +33,6 @@ function Products() {
 
   const [edit, setEdit] = useState(null);
 
-  
   const [remove, setRemove] = useState({
     show: false,
     id: null,
@@ -43,12 +42,10 @@ function Products() {
     setShow(false);
   };
 
-
   //get product data
   const getProductList = async () => {
     try {
-      const response = await apiCall("get", productsUrl ,{}, params);
-
+      const response = await apiCall("get", productsUrl, {}, params);
       if (response.status === true) {
         setgetproduct(response.data.docs);
         setpagination({
@@ -66,7 +63,7 @@ function Products() {
 
   //------create & edit location-------
 
-  const productList = async (e,id) => {
+  const productList = async (e, id) => {
     try {
       if (id) {
         const updateResponse = await apiCall(
@@ -75,18 +72,17 @@ function Products() {
           data
         );
         if (updateResponse) {
-          setShow(false);  
+          setShow(false);
           await getProductList();
-         
-        } 
+          ShowToast("suceessfully Updated", true);
+        }
       } else {
         const createResponse = await apiCall("post", productUrl, data);
         if (createResponse) {
           setShow(false);
-         await getProductList();
-          
-        } 
-        
+          await getProductList();
+          ShowToast("succesfully Adedd", true);
+        }
       }
       setData({
         name: "",
@@ -100,8 +96,6 @@ function Products() {
     }
   };
 
-
-
   /// delete location list
   const deleteProduct = async (id) => {
     try {
@@ -109,8 +103,8 @@ function Products() {
       if (response) {
         await getProductList();
         setRemove({ show: false, id: null });
-   
-      } 
+        ShowToast("succesfully deleted", true);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -125,13 +119,13 @@ function Products() {
       stock: item.stock,
       description: item.description,
     });
-    setShow(true)
+    setShow(true);
   };
 
   useEffect(() => {
     getProductList();
     if (!show) {
-      setEdit(null); 
+      setEdit(null);
       setData({
         name: "",
         sku: "",
@@ -139,7 +133,7 @@ function Products() {
         description: "",
       });
     }
-  }, [params,show]);
+  }, [params, show]);
 
   return (
     <div>
@@ -248,6 +242,7 @@ function Products() {
                               <td>{item?.name}</td>
                               <td>{item?.sku}</td>
                               <td>{item?.stock}</td>
+
                               <td>{item?.description}</td>
 
                               <td>
@@ -375,7 +370,7 @@ function Products() {
             <Form
               onSubmit={(e) => {
                 e.preventDefault();
-                productList(e,edit);
+                productList(e, edit);
               }}
               className="parsley-examples"
             >
@@ -400,10 +395,16 @@ function Products() {
                   Sku<span className="text-danger">*</span>
                 </label>
                 <input
-                  type="tel"
+                  type="number"
                   name="mob"
                   value={data.sku ? data.sku : ""}
-                  onChange={(e) => setData({ ...data, sku: e.target.value })}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    // Check if the input is a non-negative number
+                    if (/^\d+$/.test(inputValue) || inputValue === "") {
+                      setData({ ...data, sku: inputValue });
+                    }
+                  }}
                   placeholder="Enter Sku"
                   className="form-control"
                   id="mobileNumber"
@@ -414,10 +415,11 @@ function Products() {
                   Stock<span className="text-danger">*</span>
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   name="nick"
                   parsley-trigger="change"
                   required
+                  pattern="[0-9]{10}"
                   value={data.stock ? data.stock : ""}
                   onChange={(e) => setData({ ...data, stock: e.target.value })}
                   placeholder="Enter Stock"
@@ -465,20 +467,16 @@ function Products() {
         </div>
       </Modal>
 
-       {/*Delete data in home */}
-       <Modal show={remove.show} >
+      {/*Delete data in home */}
+      <Modal show={remove.show}>
         <Modal.Body>
           <p>Are you sure to delete </p>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-          variant="success"
-          onClick={handleCloses}
-          >
+          <Button variant="success" onClick={handleCloses}>
             No
           </Button>
-          <Button variant="danger"
-          onClick={deleteProduct} >
+          <Button variant="danger" onClick={deleteProduct}>
             Yes
           </Button>
         </Modal.Footer>

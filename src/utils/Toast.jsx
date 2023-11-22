@@ -1,16 +1,30 @@
-import { Flip , toast } from "react-toastify";
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css';
 
+export const ShowToast = (message, type) => {
+    if (type) {
+      toast.success(message, {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
 
-const options =  {
-    position: "top-right",
-    autoClose: 5000,
-    hideProgressBar: true,
-    closeOnClick: true,    
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-    transition : Flip,
-};
+      });
+    } else {
+      toast.error(message, {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
 
-export const ShowToast = ( message,isSuccess ) => isSuccess ?   toast.success(message,options) : toast.error(message,options);  
+      });
+    }
+  };

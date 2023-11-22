@@ -53665,10 +53665,7 @@ tbody td {
   color: black !important;
   font-weight: 500;
 }
-.addbutton{
-width: 10%;
-border-radius: 5px;
-color: white;
-border: none;
-margin-left: 85%;
+
+.sub-form{
+  width: 95%;
 }

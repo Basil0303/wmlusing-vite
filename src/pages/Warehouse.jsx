@@ -6,6 +6,7 @@ import { Modal } from "react-bootstrap";
 import { Form } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router-dom";
+import { ShowToast } from "../utils/Toast";
 
 function Warehouse() {
   const navigate = useNavigate();
@@ -78,12 +79,14 @@ function Warehouse() {
         if (updateResponse) {
           setShow(false);
           await getWareHouse();
+          ShowToast("succesfully Adedd",true)
         }
       } else {
         const createResponse = await apiCall("post", warehousecreUrl, data);
         if (createResponse) {
           setShow(false);
           await getWareHouse();
+          ShowToast("succesfully Adedd",true)
         }
       }
       setData({
@@ -105,7 +108,9 @@ function Warehouse() {
       const response = await apiCall("delete", `${warehouseUrl}/${remove.id}`);
       if (response) {
         await getWareHouse();
+  
         setRemove({ show: false, id: null });
+        ShowToast("successfully Deleted",true)
       }
     } catch (error) {
       console.error(error);
@@ -339,7 +344,6 @@ function Warehouse() {
                                     </a>
                                     <a
                                       className="dropdown-item"
-                                      href="#"
                                       onClick={() =>
                                         navigate(`/stocklevel/${item._id}`)
                                       }

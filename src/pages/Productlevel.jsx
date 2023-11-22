@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { apiCall } from "../Services/ApiCall";
-import { stockLevelUrl } from "../Services/BaseUrl";
-import { useParams } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { stockmoveUrl } from "../Services/BaseUrl";
+import { useLocation, useParams } from "react-router-dom";
 
-function Stocklevel() {
-  const [getstock, setgetStock] = useState([]);
+
+function Productlevel() {
+  const [getproduct, setgetProduct] = useState([]);
+
+  let slNoCounter = 1;
+
+  const location= useLocation();
+  const{product}=location.state
+
 
   const { id } = useParams();
 
@@ -20,13 +26,13 @@ function Stocklevel() {
     limit: 5,
     query: "",
   });
-  //get user data
-  const getStockLevel = async () => {
-    try {
-      const response = await apiCall("get", `${stockLevelUrl}/${id}`, {});
 
+  //get product data
+  const getProductLevel = async () => {
+    try {
+      const response = await apiCall("get", `${stockmoveUrl}`, {});
       if (response.status === true) {
-        setgetStock(response.data.docs);
+        setgetProduct(response.data.movements);
         setpagination({
           hasNextPage: response.data.hasNextPage,
           hasPreviousPage: response.data.hasPreviousPage,
@@ -41,15 +47,16 @@ function Stocklevel() {
   };
 
   useEffect(() => {
-    getStockLevel();
+    getProductLevel();
   }, []);
+
   return (
     <div>
       <div className="col-xl-12">
         <div className="card dz-card" id="bootstrap-table11">
           <div className="card-header flex-wrap d-flex justify-content-between">
             <div>
-              <h4 className="card-title">Stock Level Table</h4>
+              <h4 className="card-title">Product Level Table</h4>
             </div>
             <div
               className="nav nav-tabs dzm-tabs d-flex align-items-center"
@@ -114,36 +121,20 @@ function Stocklevel() {
                     <thead>
                       <tr>
                         <th>SL</th>
-                        <th>Product Name</th>
-                        <th>Quantity</th>
+                        <th> Product Name</th>
+                        <th>quantity</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {getstock?.length ? (
-                        <>
-                          {getstock?.map((product, index) => (
-                            <tr key={index}>
-                              <td>
-                                {params.page === 1
-                                  ? index + 1
-                                  : params.limit * (params.page - 1) +
-                                    (index + 1)}
-                              </td>
-
-                              <td>{product?.product?.name}</td>
-                              <td>
-                                {product?.movement_id?.products[0].quantity}
-                              </td>
-                            </tr>
-                          ))}
-                        </>
-                      ) : (
+                        <td>{slNoCounter++}</td>
+                           <td>{product?.product?.name}</td>
+                          <td>{product?.quantity}</td>
                         <tr>
                           <td colSpan={7} style={{ textAlign: "center" }}>
-                            <b> No Data Found </b>{" "}
+                            {/* <b> No Data Found </b>{" "} */}
                           </td>
                         </tr>
-                      )}
+                      
                     </tbody>
                   </table>
                 </div>
@@ -170,26 +161,8 @@ function Stocklevel() {
           </div>
         </div>
       </div>
-      <Helmet>
-        <script src="/vendor/global/global.min.js"></script>
-        <script src="/vendor/chart.js/Chart.bundle.min.js"></script>
-        <script src="/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
-
-        <script src="/vendor/draggable/draggable.js"></script>
-        <script src="/vendor/swiper/js/swiper-bundle.min.js"></script>
-
-        <script src="/vendor/tagify/dist/tagify.js"></script>
-
-        <script src="/vendor/jqvmap/js/jquery.vmap.min.js"></script>
-        <script src="/vendor/jqvmap/js/jquery.vmap.world.js"></script>
-        <script src="/vendor/jqvmap/js/jquery.vmap.usa.js"></script>
-        <script src="js/custom.js"></script>
-        <script src="js/deznav-init.js"></script>
-        <script src="js/demo.js"></script>
-        <script src="//static.filestackapi.com/filestack-js/3.x.x/filestack.min.js"></script>
-      </Helmet>
     </div>
   );
 }
 
-export default Stocklevel;
+export default Productlevel;

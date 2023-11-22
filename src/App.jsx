@@ -9,6 +9,7 @@ import Stocklevel from './pages/Stocklevel';
 import Stockmovement from './pages/Stockmovements';
 import Loginpage from "./pages/Loginpage";
 // import Godwon from "./pages/Godwon";
+import Productlevel from "./pages/Productlevel";
 
 
 
@@ -21,6 +22,7 @@ function App() {
             <Route path="/users" element={<Users/>}  />
             <Route path="/products" element={<Products/>}  />
             {/* <Route path="/godown" element={<Godwon/>}  /> */}
+            <Route path="/productlevel/:id" element={<Productlevel/>}/>
             <Route path="/warehouse" element={<Warehouse/>}  />
             <Route path="/stocklevel/:id" element={<Stocklevel/>}  />
             <Route path="/stockmovement" element={<Stockmovement/>}  />
