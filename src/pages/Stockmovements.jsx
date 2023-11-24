@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { apiCall } from "../Services/ApiCall";
 import { stockLevelUrl } from "../Services/BaseUrl";
 import { stockmoveUrl } from "../Services/BaseUrl";
@@ -24,6 +24,7 @@ function Stockmovements() {
     reason: "",
   });
 
+
   const [productlist, setProductList] = useState({
     product: "",
     quantity: "",
@@ -43,7 +44,7 @@ function Stockmovements() {
     page: 1,
     limit: 10,
     query: "",
-    reason: "",
+    reason:""
   });
 
   const [show, setShow] = useState(false);
@@ -55,16 +56,11 @@ function Stockmovements() {
   //get move data
   const getStockMove = async () => {
     try {
-      const response = await apiCall(
-        "get",
-        stockmoveUrl,
-        {},
-        {
-          ...params,
-          reason: data.reason,
-        }
-      );
-      console.log("Response:", response);
+      const response = await apiCall("get", stockmoveUrl, {},  {
+        ...params,
+        reason: data.reason,
+      });
+
       if (response.status === true) {
         setgetStockmove(response?.data?.movements);
         setpagination({
@@ -82,7 +78,6 @@ function Stockmovements() {
 
   //create move data
   const moveMent = async () => {
-    console.log("posting ");
     let productdata = data;
     if (store.length) {
       productdata.products = store;
@@ -123,7 +118,7 @@ function Stockmovements() {
   //to api call in stock level
   const getStockList = async (id) => {
     var list = [];
-
+  
     try {
       const response = await apiCall("get", `${stockLevelUrl}/${id}`, {});
       if (response.status) {
@@ -134,10 +129,8 @@ function Stockmovements() {
           value: product?.product?._id,
           totalstocks: product?.product?.stock,
         }));
-
         setDamageProduct(array);
         setProduct(array);
-
         // setgetProduct(response.data.movements);
       }
     } catch (error) {
@@ -146,65 +139,69 @@ function Stockmovements() {
   };
 
   const addFunction = () => {
-    console.log("adding");
+  
     const selectedProduct = productlist.product;
     const quantity = productlist.quantity;
-
+  
     const selectedProductData = product.find(
       (product) => product.value === selectedProduct
     );
-
+  
+ 
     if (selectedProductData) {
-      if (data.reason === "damage") {
-        setDamageProduct([
-          ...damageproduct,
-          { value: selectedProduct, quantity },
-        ]);
+  
+      if (data.reason === 'damage') {
+       
+  
 
+        setDamageProduct([...damageproduct, { value: selectedProduct, quantity }]);
+  
+      
         setWarehouse((prevWarehouses) => {
+        
           const updatedWarehouses = prevWarehouses.map((warehouse) => {
+
             if (warehouse.value === data.toWarehouse) {
+          
               return {
                 ...warehouse,
                 totalstocks: warehouse.totalstocks - quantity,
               };
             }
-
+            
             return warehouse;
           });
-
+  
+         
           return updatedWarehouses;
         });
       } else {
+        
         setStore([...store, { product: selectedProduct, quantity }]);
       }
-
+  
       setProductList({ product: null, quantity: null });
     } else {
-      ShowToast("Selected product not found.");
+
+      ShowToast('Selected product not found.');
     }
   };
-
   const staticOptions = [
-    { value: "transfer", label: "transfer" },
-    { value: "damage", label: "damage" },
+    { value: "transfer", label: "transfer " },
+    { value: "damage", label: "damage " },
   ];
 
-  const resetForm = () => {
-    setData({ ...data, reason: "" });
-    setparams({ ...params, reason: "" });
-  };
-  const resetButtonRef = useRef(null);
   useEffect(() => {
     getStockMove();
     getPopupdata();
   }, [params]);
 
+  
+
   useEffect(() => {
     if (data.toWarehouse) {
       if (data.reason === "damage") {
         getStockList(data.toWarehouse);
-        resetButtonRef.current.click();
       } else if (data.reason === "transfer") {
         getPopupdata();
       }
@@ -227,36 +224,43 @@ function Stockmovements() {
             >
               <li className="nav-item me-1">
                 <div className="input-group search-area">
-                  <div className="row">
-                    <Select
-                      options={staticOptions}
-                      onChange={(reason) => {
-                        setData({
-                          ...data,
-                          reason: reason.value,
-                        });
-                        setparams({
-                          ...params,
-                          reason: reason.value,
-                        });
-                      }}
-                    />
-                  </div>
-                  <div className="col ms-1">
-                    <button
-                      ref={resetButtonRef}
-                      className="mx-1 btn btn-sm btn-primary form-control"
-                      style={{
-                        color: "white",
-                        width: "58px",
-                        height: "37px",
-                        borderRadius: "3px",
-                      }}
-                      onClick={resetForm}
-                    >
-                      Reset
-                    </button>
-                  </div>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search here..."
+                    value={params.query}
+                    onChange={(e) =>
+                      setparams({ ...params, query: e.target.value })
+                    }
+                  />
+                  <span className="input-group-text">
+                    <a href={undefined}>
+                      <svg
+                        width={24}
+                        height={24}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <g clipPath="url(#clip0_1_450)">
+                          <path
+                            opacity="0.3"
+                            d="M14.2929 16.7071C13.9024 16.3166 13.9024 15.6834 14.2929 15.2929C14.6834 14.9024 15.3166 14.9024 15.7071 15.2929L19.7071 19.2929C20.0976 19.6834 20.0976 20.3166 19.7071 20.7071C19.3166 21.0976 18.6834 21.0976 18.2929 20.7071L14.2929 16.7071Z"
+                            fill="#452B90"
+                          />
+                          <path
+                            d="M11 16C13.7614 16 16 13.7614 16 11C16 8.23859 13.7614 6.00002 11 6.00002C8.23858 6.00002 6 8.23859 6 11C6 13.7614 8.23858 16 11 16ZM11 18C7.13401 18 4 14.866 4 11C4 7.13402 7.13401 4.00002 11 4.00002C14.866 4.00002 18 7.13402 18 11C18 14.866 14.866 18 11 18Z"
+                            fill="#452B90"
+                          />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_1_450">
+                            <rect width={24} height={24} fill="white" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                    </a>
+                  </span>
                 </div>
               </li>
               <li className="nav-item ms-1">
@@ -318,7 +322,7 @@ function Stockmovements() {
                               <td>
                                 {movement.movedBy ? movement.movedBy.name : ""}
                               </td>
-                              <td>{movement?.reason}</td>
+                              <td>{movement.reason}</td>
                               <td>
                                 {new Date(
                                   movement.moveDate
@@ -433,39 +437,7 @@ function Stockmovements() {
               }}
               className="parsley-examples"
             >
-              {" "}
-              <div className="mb-3">
-                <label htmlFor="distributorname" className="form-label">
-                  Reason<span className="text-danger">*</span>
-                </label>
-                <Select
-                  required
-                  options={staticOptions}
-                  onChange={(reason) => {
-                    setData({
-                      ...data,
-                      reason: reason.value,
-                    });
-                    console.log(reason.value, "resssss");
-                  }}
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="distributorname" className="form-label">
-                  {data.reason !== "transfer" ? "Fromwarehouse" : "Towarehouse"}
-                </label>
-                <Select
-                  options={warehouse}
-                  onChange={(warehouse) => {
-                    setData({
-                      ...data,
-                      toWarehouse: warehouse.value,
-                    });
-
-                    // getStockList(warehouse.value)
-                  }}
-                />
-              </div>
+            
               <div className="form-table border border-secondary p-3">
                 <div className="sub-form">
                   <div className="" style={{ flex: 10, position: "fixed" }}>
@@ -483,7 +455,6 @@ function Stockmovements() {
                       ))}
                     </ul>
                   </div>
-
                   <div className="" style={{ marginLeft: "55%" }}>
                     <div className="mb-2">
                       <label htmlFor="distributorname" className="form-label">
@@ -526,11 +497,41 @@ function Stockmovements() {
                     className="addbutton btn btn-lg btn-success"
                     style={{ padding: "3px 5px", marginLeft: "90%" }}
                     onClick={addFunction}
-                    type="button"
                   >
                     Add
                   </button>
                 </div>
+              </div>
+              <div className="mb-4">
+                <label htmlFor="distributorname" className="form-label">
+                  Reason<span className="text-danger">*</span>
+                </label>
+                <Select
+                  required
+                  options={staticOptions}
+                  onChange={(reason) => {
+                    setData({
+                      ...data,
+                      reason: reason.value,
+                    });
+                  }}
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="distributorname" className="form-label">
+                  {data.reason !== "transfer" ? "Fromwarehouse" : "Towarehouse"}
+                </label>
+                <Select
+                  options={warehouse}
+                  onChange={(warehouse) => {
+                    setData({
+                      ...data,
+                      toWarehouse: warehouse.value,
+                    });
+
+                    // getStockList(warehouse.value)
+                  }}
+                />
               </div>
               <div className="text-end mb-3">
                 <button
