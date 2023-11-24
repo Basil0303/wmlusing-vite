@@ -20,7 +20,7 @@ function Users() {
     username: "",
     password: "",
     role: "",
-    // active: "",
+    active: "",
   });
 
   const [pagination, setpagination] = useState({
@@ -32,7 +32,6 @@ function Users() {
   const [params, setparams] = useState({
     page: 1,
     limit: 5,
-    query: "",
   });
 
   const [show, setShow] = useState(false);
@@ -43,6 +42,9 @@ function Users() {
     show: false,
     id: null,
   });
+
+  const [selectedRole, setSelectedRole] = useState(null);
+
   const handleCloses = () => {
     setRemove({ show: false, id: null });
     setShow(false);
@@ -76,7 +78,8 @@ function Users() {
           setShow(false);
           await getUserList();
         }
-        ShowToast("succesfully Adedd", true);
+        ShowToast("succesfully Updated", true);
+
         setData({
           name: user.name,
           address: user.address,
@@ -84,7 +87,7 @@ function Users() {
           username: user.username,
           password: user.password,
           role: user.role,
-          // active: user.active,
+          active: user.active,
         });
       } else {
         const createResponse = await apiCall("post", usercreUrl, data);
@@ -93,6 +96,7 @@ function Users() {
           setShow(false);
           await getUserList();
           ShowToast("succesfully Adedd", true);
+          setSelectedRole(null);
         }
       }
       setData({
@@ -130,15 +134,20 @@ function Users() {
 
   const editedItem = (user) => {
     setEdit(user._id);
+
+    // Set the initial role value for the Select component
+    setSelectedRole({ value: user.role, label: user.role });
+
     setData({
       name: user.name,
       address: user.address,
       mobile: user.mobile,
       username: user.username,
       password: user.password,
-      role: user.role,
-      active: user.active,
+      role: user.role || "",
+      active: user.active ? "true" : "false",
     });
+
     setShow(true);
   };
 
@@ -182,12 +191,11 @@ function Users() {
                     type="text"
                     className="form-control"
                     placeholder="Search here..."
-                    value={params.query}
+                    value={params?.name}
                     onChange={(e) =>
-                      setparams({ ...params, query: e.target.value })
+                      setparams({ ...params, name: e.target.value })
                     }
                   />
-
                   <span className="input-group-text">
                     <a href={undefined}>
                       <svg
@@ -482,10 +490,10 @@ function Users() {
                 </label>
                 <input
                   required
-                  type="tel" 
+                  type="tel"
                   name="mob"
-                  maxLength="10" 
-                  minLength="10" 
+                  maxLength="10"
+                  minLength="10"
                   pattern="[0-9]{10}"
                   value={data.mobile ? data.mobile : ""}
                   onChange={(e) => setData({ ...data, mobile: e.target.value })}
@@ -534,7 +542,9 @@ function Users() {
                 <Select
                   required
                   options={staticOptions}
+                  value={selectedRole}
                   onChange={(role) => {
+                    setSelectedRole(role);
                     setData({
                       ...data,
                       role: role.value,
