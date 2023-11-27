@@ -53655,6 +53655,11 @@ html[dir="rtl"]
   background-size: cover;
   height: 100vh;
   background-position: center;
+} 
+
+.overflow-container{
+  max-height: 300px; 
+  overflow-y: auto;
 }
 
 a {
@@ -53666,6 +53671,12 @@ tbody td {
   font-weight: 500;
 }
 
-.sub-form{
+/* .sub-form{
   width: 95%;
+} */
+@media (max-width: 768px) {
+  .sub-form {
+    /* Adjust styles for smaller screens */
+    margin-left: 0;
+  }
 }

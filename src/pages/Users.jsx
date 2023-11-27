@@ -23,6 +23,8 @@ function Users() {
     active: "",
   });
 
+  const [toggle, setToggle] = useState();
+
   const [pagination, setpagination] = useState({
     hasNextPage: false,
     hasPreviousPage: false,
@@ -44,6 +46,15 @@ function Users() {
   });
 
   const [selectedRole, setSelectedRole] = useState(null);
+
+  const [activeStatus, setActiveStatus] = useState({});
+
+  const handleToggle = (userId) => {
+    setActiveStatus((prevStatus) => ({
+      ...prevStatus,
+      [userId]: !prevStatus[userId],
+    }));
+  };
 
   const handleCloses = () => {
     setRemove({ show: false, id: null });
@@ -152,7 +163,7 @@ function Users() {
   };
 
   const staticOptions = [
-    { value: "warehouseManager", label: "warehouseManager " },
+    { value: "warehousemanager", label: "warehousemanager " },
   ];
 
   useEffect(() => {
@@ -284,7 +295,7 @@ function Users() {
                               <td>{user?.password}</td>
                               <td>{user?.role}</td>
 
-                              <td>
+                              {/* <td>
                                 {user?.active === true && (
                                   <span
                                     class="badge rounded-pill bg-primary px-2"
@@ -302,7 +313,19 @@ function Users() {
                                     False
                                   </span>
                                 )}
-                              </td>
+                              </td> */}
+                               <td>
+                <button
+                  type="button"
+                  onClick={() => handleToggle(user._id)}
+                  className={`badge rounded-pill ${
+                    activeStatus[user._id] ? "bg-primary" : "bg-success"
+                  } px-2`}
+                  style={{ fontSize: "9px" }}
+                >
+                  {activeStatus[user._id] ? "True" : "False"}
+                </button>
+              </td>
 
                               <td>
                                 <div className="dropdown">

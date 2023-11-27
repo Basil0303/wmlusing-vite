@@ -5,10 +5,8 @@ import { stockmoveUrl } from "../Services/BaseUrl";
 import { stockmovecreUrl } from "../Services/BaseUrl";
 import { productsUrl } from "../Services/BaseUrl";
 import { warehouseUrl } from "../Services/BaseUrl";
-import { Modal } from "react-bootstrap";
-import { Form } from "react-bootstrap";
+import { Form, Modal, Button, Row, Col } from "react-bootstrap";
 import Select from "react-select";
-import format from "date-fns/format";
 import { useNavigate } from "react-router-dom";
 import { ShowToast } from "../utils/Toast";
 
@@ -24,10 +22,9 @@ function Stockmovements() {
     reason: "",
   });
 
-
   const [productlist, setProductList] = useState({
     product: "",
-    quantity: "",
+    quantity: 0,
   });
 
   const [store, setStore] = useState([]);
@@ -44,7 +41,6 @@ function Stockmovements() {
     page: 1,
     limit: 10,
     query: "",
-    reason:""
   });
 
   const [show, setShow] = useState(false);
@@ -56,11 +52,16 @@ function Stockmovements() {
   //get move data
   const getStockMove = async () => {
     try {
-      const response = await apiCall("get", stockmoveUrl, {},  {
-        ...params,
-        reason: data.reason,
-      });
-
+      const response = await apiCall(
+        "get",
+        stockmoveUrl,
+        {},
+        {
+          ...params,
+          reason: data.reason,
+        }
+      );
+      console.log("Response:", response);
       if (response.status === true) {
         setgetStockmove(response?.data?.movements);
         setpagination({
@@ -78,6 +79,7 @@ function Stockmovements() {
 
   //create move data
   const moveMent = async () => {
+    console.log("posting ");
     let productdata = data;
     if (store.length) {
       productdata.products = store;
@@ -118,7 +120,7 @@ function Stockmovements() {
   //to api call in stock level
   const getStockList = async (id) => {
     var list = [];
-  
+
     try {
       const response = await apiCall("get", `${stockLevelUrl}/${id}`, {});
       if (response.status) {
@@ -129,8 +131,10 @@ function Stockmovements() {
           value: product?.product?._id,
           totalstocks: product?.product?.stock,
         }));
+
         setDamageProduct(array);
         setProduct(array);
+
         // setgetProduct(response.data.movements);
       }
     } catch (error) {
@@ -138,65 +142,69 @@ function Stockmovements() {
     }
   };
 
-  const addFunction = () => {
+
   
+  const addFunction = () => {
+    console.log("adding");
     const selectedProduct = productlist.product;
     const quantity = productlist.quantity;
-  
+
     const selectedProductData = product.find(
       (product) => product.value === selectedProduct
     );
-  
- 
+
     if (selectedProductData) {
-  
-      if (data.reason === 'damage') {
-       
-  
-
-        setDamageProduct([...damageproduct, { value: selectedProduct, quantity }]);
-  
-      
+      if (data.reason === "damage") {
+        setDamageProduct([
+          ...damageproduct,
+          { value: selectedProduct, quantity },
+        ]);
+console.log(setDamageProduct,"damageeeeeeeee")
         setWarehouse((prevWarehouses) => {
-        
           const updatedWarehouses = prevWarehouses.map((warehouse) => {
-
             if (warehouse.value === data.toWarehouse) {
-          
               return {
                 ...warehouse,
                 totalstocks: warehouse.totalstocks - quantity,
               };
             }
-            
+
             return warehouse;
           });
-  
-         
+
           return updatedWarehouses;
         });
       } else {
-        
         setStore([...store, { product: selectedProduct, quantity }]);
       }
-  
+
       setProductList({ product: null, quantity: null });
     } else {
-
-      ShowToast('Selected product not found.');
+      ShowToast("Selected product not found.");
     }
+    setProductList({
+      product: "",
+      quantity: "",
+    });
+  };
+
+
+
+  const removeProduct = (index) => {
+    // Remove the product at the specified index from the store array
+    const updatedStore = [...store];
+    updatedStore.splice(index, 1);
+    setStore(updatedStore);
   };
   const staticOptions = [
-    { value: "transfer", label: "transfer " },
-    { value: "damage", label: "damage " },
+    { value: "transfer", label: "transfer" },
+    { value: "damage", label: "damage" },
   ];
 
   useEffect(() => {
     getStockMove();
     getPopupdata();
   }, [params]);
-
-  
 
   useEffect(() => {
     if (data.toWarehouse) {
@@ -233,6 +241,7 @@ function Stockmovements() {
                       setparams({ ...params, query: e.target.value })
                     }
                   />
+
                   <span className="input-group-text">
                     <a href={undefined}>
                       <svg
@@ -262,6 +271,10 @@ function Stockmovements() {
                     </a>
                   </span>
                 </div>
+              </li>
+
+              <li className="nav-item me-1">
+                <div className="input-group search-area"></div>
               </li>
               <li className="nav-item ms-1">
                 <button
@@ -322,7 +335,7 @@ function Stockmovements() {
                               <td>
                                 {movement.movedBy ? movement.movedBy.name : ""}
                               </td>
-                              <td>{movement.reason}</td>
+                              <td>{movement?.reason}</td>
                               <td>
                                 {new Date(
                                   movement.moveDate
@@ -419,139 +432,152 @@ function Stockmovements() {
         </div>
       </div>
       <Modal show={show} onHide={() => setShow(false)}>
-        <div className="modal-content">
-          <div className="modal-header">
-            <button
-              type="button"
-              className="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-              onClick={() => setShow(false)}
-            />
-          </div>
-          <div className="modal-body">
-            <Form
-              onSubmit={(e) => {
-                e.preventDefault();
-                moveMent(e);
-              }}
-              className="parsley-examples"
-            >
-            
-              <div className="form-table border border-secondary p-3">
-                <div className="sub-form">
-                  <div className="" style={{ flex: 10, position: "fixed" }}>
+        <Modal.Body>
+          <Form
+            onSubmit={(e) => {
+              e.preventDefault();
+              moveMent(e);
+            }}
+            className="parsley-examples"
+          >
+            <Form.Group className="mb-4">
+              <Form.Label>
+                Reason<span className="text-danger">*</span>
+              </Form.Label>
+              <Select
+                required
+                options={staticOptions}
+                onChange={(reason) => {
+                  setData({
+                    ...data,
+                    reason: reason.value,
+                  });
+                }}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>
+                {data.reason !== "transfer" ? "Fromwarehouse" : "Towarehouse"}
+                <span className="text-danger">*</span>
+              </Form.Label>
+              <Select
+                options={warehouse}
+                onChange={(warehouse) => {
+                  setData({
+                    ...data,
+                    toWarehouse: warehouse.value,
+                  });
+                  // getStockList(warehouse.value)
+                }}
+              />
+            </Form.Group>
+            <div className="form-table-container border border-secondary p-3">
+              <div className="sub-form">
+                <Row>
+                  <Col
+                    sm={8}
+                    style={{ maxHeight: "300px", overflowY: "scroll" }}
+                  >
                     <ul>
                       {store.map((item, index) => (
-                        <li key={index}>
+                        <li
+                          key={index}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
                           Product:{" "}
                           {
                             product.find(
                               (product) => product.value === item.product
-                            ).label
+                            )?.label
                           }
                           , Quantity: {item.quantity}
+                          <button
+                            className="btn btn-sm btn-danger mb-1"
+                            style={{ marginLeft: "10px" }}
+                            onClick={() => removeProduct(index)}
+                          >
+                            <i className="fa fa-times" />
+                          </button>
                         </li>
                       ))}
                     </ul>
-                  </div>
-                  <div className="" style={{ marginLeft: "55%" }}>
-                    <div className="mb-2">
-                      <label htmlFor="distributorname" className="form-label">
-                        Product<span className="text-danger">*</span>
-                      </label>
-                      <Select
-                        required
-                        options={product}
-                        onChange={(selectedProduct) => {
-                          setProductList({
-                            ...productlist,
-                            product: selectedProduct.value,
-                          });
-                        }}
-                      />
-                    </div>
+                  </Col>
+                  <Col sm={4}>
+                    <Form>
+                      <Form.Group className="mb-2">
+                        <Form.Label>
+                          Product<span className="text-danger">*</span>
+                        </Form.Label>
+                        <Select
+                          required
+                          options={product}
+                          onChange={(selectedProduct) => {
+                            setProductList({
+                              ...productlist,
+                              product: selectedProduct.value,
+                            });
+                          }}
+                        />
+                      </Form.Group>
 
-                    <div className="mb-2">
-                      <label htmlFor="mobileNumber" className="form-label">
-                        Quantity<span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        pattern="[0-9]{10}"
-                        name="mob"
-                        value={productlist.quantity ? productlist.quantity : ""}
-                        onChange={(e) =>
-                          setProductList({
-                            ...productlist,
-                            quantity: e.target.value,
-                          })
-                        }
-                        placeholder="Enter Quantity"
-                        className="form-control"
-                        id="mobileNumber"
-                      />
-                    </div>
-                  </div>
-                  <button
-                    className="addbutton btn btn-lg btn-success"
-                    style={{ padding: "3px 5px", marginLeft: "90%" }}
-                    onClick={addFunction}
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
-              <div className="mb-4">
-                <label htmlFor="distributorname" className="form-label">
-                  Reason<span className="text-danger">*</span>
-                </label>
-                <Select
-                  required
-                  options={staticOptions}
-                  onChange={(reason) => {
-                    setData({
-                      ...data,
-                      reason: reason.value,
-                    });
-                  }}
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="distributorname" className="form-label">
-                  {data.reason !== "transfer" ? "Fromwarehouse" : "Towarehouse"}
-                </label>
-                <Select
-                  options={warehouse}
-                  onChange={(warehouse) => {
-                    setData({
-                      ...data,
-                      toWarehouse: warehouse.value,
-                    });
+                      <Form.Group className="mb-2">
+                        <Form.Label>
+                          Quantity<span className="text-danger">*</span>
+                        </Form.Label>
+                        <Form.Control
+                          step="1"
+                          type="number"
+                          name="mob"
+                          value={
+                            productlist.quantity >= 0
+                              ? productlist.quantity
+                              : ""
+                          }
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value, 10);
+                            if (!isNaN(value) && value >= 0) {
+                              setProductList({
+                                ...productlist,
+                                quantity: value,
+                              });
+                            }
+                          }}
+                          placeholder="Enter Quantity"
+                          required
+                        />
+                      </Form.Group>
 
-                    // getStockList(warehouse.value)
-                  }}
-                />
+                      <Button
+                        className="addbutton btn"
+                        variant="success"
+                        style={{ padding: "5px 8px", marginLeft: "65%" }}
+                        onClick={addFunction}
+                      >
+                        Add
+                      </Button>
+                    </Form>
+                  </Col>
+                </Row>
               </div>
-              <div className="text-end mb-3">
-                <button
-                  type="reset"
-                  className="btn btn-danger waves-effect"
-                  style={{ marginRight: "10px" }}
-                  onClick={() => setShow(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="btn btn-success waves-effect waves-light"
-                  type="submit"
-                >
-                  {data ? data._id ? <>update</> : <>submit</> : <>submit</>}
-                </button>
-              </div>
-            </Form>
-          </div>
-        </div>
+            </div>
+            ;
+            <div className="text-end mb-3 mt-2">
+              <Button
+                variant="danger"
+                style={{ marginRight: "10px" }}
+                onClick={() => setShow(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="success" type="submit">
+                {data ? (data._id ? "Update" : "Submit") : "Submit"}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
       </Modal>
     </div>
   );

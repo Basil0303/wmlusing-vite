@@ -15,7 +15,7 @@ function Header() {
   return (
     <>
       {" "}
-      <div className="full-header">
+      <div className="full-header" >
         <div className="nav-header">
           <div className="nav-control">
             <div className="hamburger">
@@ -42,10 +42,10 @@ function Header() {
           </div>
         </div>
 
-        <div className="header">
-          <div className="header-content">
+        <div className="header" style={{backgroundColor:"#222b40"}}>
+          <div className="header-content" >
             <nav className="navbar navbar-expand">
-              <div className="collapse navbar-collapse justify-content-between">
+              <div className="collapse navbar-collapse justify-content-between" >
                 <div className="header-left"></div>
                 <div className="header-right d-flex align-items-center">
                   <ul className="navbar-nav">
