@@ -1,6 +1,6 @@
 
 
-export const baseUrl = 'http://192.168.1.68:4999/';
+export const baseUrl = 'http://dev.foxiomlabs.com/';
 
 export const loginUrl="users/login"
 
