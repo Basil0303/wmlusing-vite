@@ -23,8 +23,6 @@ function Users() {
     active: "",
   });
 
-  const [toggle, setToggle] = useState();
-
   const [pagination, setpagination] = useState({
     hasNextPage: false,
     hasPreviousPage: false,
@@ -33,7 +31,7 @@ function Users() {
 
   const [params, setparams] = useState({
     page: 1,
-    limit: 5,
+    limit: 10,
   });
 
   const [show, setShow] = useState(false);
@@ -47,15 +45,7 @@ function Users() {
 
   const [selectedRole, setSelectedRole] = useState(null);
 
-  const [activeStatus, setActiveStatus] = useState({});
-
-  const handleToggle = (userId) => {
-    setActiveStatus((prevStatus) => ({
-      ...prevStatus,
-      [userId]: !prevStatus[userId],
-    }));
-  };
-
+  
   const handleCloses = () => {
     setRemove({ show: false, id: null });
     setShow(false);
@@ -90,19 +80,8 @@ function Users() {
           await getUserList();
         }
         ShowToast("succesfully Updated", true);
-
-        setData({
-          name: user.name,
-          address: user.address,
-          mobile: user.mobile,
-          username: user.username,
-          password: user.password,
-          role: user.role,
-          active: user.active,
-        });
       } else {
         const createResponse = await apiCall("post", usercreUrl, data);
-
         if (createResponse) {
           setShow(false);
           await getUserList();
@@ -145,10 +124,7 @@ function Users() {
 
   const editedItem = (user) => {
     setEdit(user._id);
-
-    // Set the initial role value for the Select component
     setSelectedRole({ value: user.role, label: user.role });
-
     setData({
       name: user.name,
       address: user.address,
@@ -163,8 +139,9 @@ function Users() {
   };
 
   const staticOptions = [
-    { value: "warehousemanager", label: "warehousemanager " },
+    { value: "warehouseManager", label: "WarehouseManager" },
   ];
+  
 
   useEffect(() => {
     getUserList();
@@ -295,38 +272,26 @@ function Users() {
                               <td>{user?.password}</td>
                               <td>{user?.role}</td>
 
-                              {/* <td>
+                              <td>
                                 {user?.active === true && (
                                   <span
-                                    class="badge rounded-pill bg-primary px-2"
+                                    class="badge rounded-pill bg-success px-2"
                                     style={{ fontSize: "9px" }}
                                   >
-                                    True
+                                    Active
                                   </span>
                                 )}
 
                                 {user?.active === false && (
                                   <span
-                                    class="badge rounded-pill bg-success px-2 mx-1"
+                                    class="badge rounded-pill bg-danger px-2 mx-1"
                                     style={{ fontSize: "9px" }}
                                   >
-                                    False
+                                    isActive
                                   </span>
                                 )}
-                              </td> */}
-                               <td>
-                <button
-                  type="button"
-                  onClick={() => handleToggle(user._id)}
-                  className={`badge rounded-pill ${
-                    activeStatus[user._id] ? "bg-primary" : "bg-success"
-                  } px-2`}
-                  style={{ fontSize: "9px" }}
-                >
-                  {activeStatus[user._id] ? "True" : "False"}
-                </button>
-              </td>
-
+                              </td> 
+                              
                               <td>
                                 <div className="dropdown">
                                   <button
@@ -588,7 +553,7 @@ function Users() {
                     checked={data.active === "true"}
                     onChange={() => setData({ ...data, active: "true" })}
                   />
-                  True
+                  Active
                 </label>
 
                 <label>
@@ -599,7 +564,7 @@ function Users() {
                     checked={data.active === "false"}
                     onChange={() => setData({ ...data, active: "false" })}
                   />
-                  False
+                  isActive
                 </label>
               </div>
 
